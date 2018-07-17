@@ -45,37 +45,40 @@ void capture_save () {
 		}
 	}
 
+	printf("Stats is available in /tmp/stats_sniffer\n");
+
 	fclose(capt);
 }
 
-
 void string_parsing (char * buff, int ev_sock, int sock) {
-		if (!strcmp("start", buff)) {
-			start_capture(sock, NULL);
-		} else if (!strcmp("stop", buff)) {
-			capture_save();
-			deinit_capture(sock);
-		} else if (strstr(buff, "select iface") != NULL) {
-			char iface[10];
-			strcpy(iface, buff + strlen("select iface "));
-			iface[strlen(iface)] = '\0';
-			start_capture(sock, iface);
-		} else if ((strstr(buff, "show") != NULL) && (strstr(buff, "count")) != NULL) {
-			char ip[4];
-			if (sscanf (buff, "show %s", ip) != 0) {
-				struct in_addr inp;
-				if(inet_aton(ip, &inp) == 0) {
-					printf ("Wrong ip address format!");
-				} else {
-					int num = 0;
-					num = IP_HASH(inp.s_addr);
-					printf("%d\n", num);
-					write(ev_sock, &hash_table[num], sizeof(struct ip_stats));
-				}
+
+	if (!strcmp("start", buff)) {
+		start_capture(sock, NULL);
+	} else if (!strcmp("stop", buff)) {
+		capture_save();
+		deinit_capture(sock);
+	} else if (strstr(buff, "select iface") != NULL) {
+		char iface[10];
+		strcpy(iface, buff + strlen("select iface "));
+		iface[strlen(iface)] = '\0';
+		start_capture(sock, iface);
+	} else if ((strstr(buff, "show") != NULL) && (strstr(buff, "count")) != NULL) {
+		char ip[4];
+		if (sscanf (buff, "show %s", ip) != 0) {
+			struct in_addr inp;
+			if(inet_aton(ip, &inp) == 0) {
+				printf ("Wrong ip address format!\n");
+			} else {
+				int num = 0;
+				num = IP_HASH(inp.s_addr);
+				printf("IP ADDRESS: %s\n", inet_ntoa(hash_table[num].ip_addr));
+				printf("PACKET NUMS %lu\n", hash_table[num].num);
 			}
 		}
- 
-		memset(buff, 0, sizeof(buff));
+	} else {
+		printf("Wrong command format! Please use [--help] command!\n");
+	}
+	memset(buff, 0, sizeof(&buff));
 
 }
 
@@ -125,7 +128,6 @@ void * main_sniffer_func(void * param) {
 
 	struct thread_data * thread_struct = (struct thread_data *) param; 
 	int sock = -1;
-	int i = 0;
 	char *buff = NULL;
 	ssize_t rec = 0;
 
@@ -159,13 +161,6 @@ void * main_sniffer_func(void * param) {
 			printf ("NUM: %d\n", numb);
 			hash_table[numb].ip_addr = ip_source_struct;
 			hash_table[numb].num++;
-			for (i = 0; i < 256; i++) {
-				if ((hash_table[i].num) > 0) {
-					printf("IP ADDRESS: %s\n", inet_ntoa(hash_table[i].ip_addr));
-					printf("PACKET NUMS %lu\n", hash_table[i].num);
-				}
-			}
-
 			ip_level_output(data_ipv4);
 		} 
 

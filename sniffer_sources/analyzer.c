@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
 			printf ("ERROR! In recvfrom() func \n");
 			return 0;
 		}
-		string_parsing (buff, ev_sock, param.sock);	
+		string_parsing (buff, ev_sock, param.sock);
 	}
 
 	deinit_capture(sock);

@@ -24,17 +24,17 @@ int main (int argc, char ** argv) {
 	struct sockaddr_un ev_sock_struct;
 	char buf[50] = {0};
 	
-	/* pid_t pid = fork(); */
+	pid_t pid = fork();
 
-	/* if (pid == 0) { */
-	/*     execl ("./sniffer", "sniffer", argv[1], NULL); */
-	/* } */
-	/* else if (pid > 0) { */
-	/*     printf("Child PID is %d\n", (int)pid); */
-	/* } */
-	/* else { */
-	/*     perror("fork failed"); */
-	/* } */
+	if (pid == 0) {
+		execl ("../sniffer_sources/sniffer", "sniffer", argv[1], NULL);
+	} 
+	else if (pid > 0) { 
+		printf("Child PID is %d\n", (int)pid); 
+	} 
+	else { 
+		perror("fork failed"); 
+	} 
 
 	sleep(3);
 	ev_sock = socket(AF_UNIX, SOCK_DGRAM, 0);
@@ -61,7 +61,7 @@ int main (int argc, char ** argv) {
 			f_usage(argv[0]);
 			continue;
 		} else {
-	
+
 			write(ev_sock, buf, strlen(buf));
 
 			if ((strstr(buf, "show") != NULL) && (strstr(buf, "count")) != NULL) {
