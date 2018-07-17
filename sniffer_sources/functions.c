@@ -71,8 +71,12 @@ void string_parsing (char * buff, int ev_sock, int sock) {
 			} else {
 				int num = 0;
 				num = IP_HASH(inp.s_addr);
-				printf("IP ADDRESS: %s\n", inet_ntoa(hash_table[num].ip_addr));
-				printf("PACKET NUMS %lu\n", hash_table[num].num);
+				if (hash_table[num].num > 0) {	
+					printf("IP ADDRESS: %s\n", inet_ntoa(hash_table[num].ip_addr));
+					printf("PACKET NUMS %lu\n", hash_table[num].num);
+				} else {
+					printf ("No available stats for ip_addr %s \n", ip);
+				}
 			}
 		}
 	} else {
@@ -107,7 +111,7 @@ int init_conn () {
 
 	ev_sock = socket(AF_UNIX, SOCK_DGRAM, 0);
 	if (ev_sock < 0) {
-		printf ("ERROR!\n");
+		printf ("ERROR! Can't create socket\n");
 		return 1;
 	}
 
@@ -149,22 +153,23 @@ void * main_sniffer_func(void * param) {
 
 		data_packet = (struct ether_header *) buff;
 
-		printf ("Packet size: %ld \n", rec);
-
-		mac_level_output(data_packet);
+//		printf ("Packet size: %ld \n", rec);
+		
+		#ifdef DEBUG_MODE
+			mac_level_output(data_packet);
+		#endif
 
 		if (ntohs(data_packet->eth_type) == 0x0800) {
 
 			data_ipv4 = (struct ipv4_header *) &buff[sizeof(struct ether_header)];
 
 			numb = IP_HASH(ip_source_struct.s_addr);
-			printf ("NUM: %d\n", numb);
 			hash_table[numb].ip_addr = ip_source_struct;
 			hash_table[numb].num++;
-			ip_level_output(data_ipv4);
+			#ifdef DEBUG_MODE
+				ip_level_output(data_ipv4);
+			#endif
 		} 
-
-		printf ("\n \n");
 	}
 
 	free (buff); 
@@ -180,7 +185,7 @@ int ret_index_by_name (char * device_name, struct ifreq iface, int sock) {
 			return -1;
 		}
 
-		printf ("%d\n\n", iface.ifr_ifindex);
+	//	printf ("%d\n\n", iface.ifr_ifindex);
 		return iface.ifr_ifindex;	
 }
 

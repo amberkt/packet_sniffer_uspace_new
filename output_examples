@@ -1,0 +1,27 @@
+[amber@eira cli_sources]$ sudo ./cli
+Child PID is 12867
+start
+Default iface selected: lo       
+stop
+Stats is available in /tmp/stats_sniffer
+Socket closed
+
+[amber@eira cli_sources]$ sudo ./cli
+Child PID is 12898
+select iface wlp2s0
+Capture started on iface wlp2s0 
+show 0.0.0.0 count
+IP ADDRESS: 0.0.0.0
+PACKET NUMS 763
+show blabla count
+Wrong ip address format!
+--help
+USAGE: 
+	sudo ./cli [start] [stop] [show [ip] count] [select iface [iface]] stat[iface] 
+	start - packets are being sniffed from now on from default iface (eth0) 
+	stop - packets are not sniffed 
+ 	show [ip] count - print number of packets received from selected ip address 
+ 	select_iface [iface] - select interface for sniffing eth0, wlan0, ethN, wlanN 
+	stat [iface] - show all collected statistics for particular interface, if iface ommited - for all interfaces
+
+ 
